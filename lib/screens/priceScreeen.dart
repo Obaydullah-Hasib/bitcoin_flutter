@@ -1,8 +1,8 @@
 import 'package:bitcoin_ticker/data/coin_data.dart';
+import 'package:bitcoin_ticker/models/newDataModel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../models/data_model.dart';
 
 class PriceScreen extends StatefulWidget {
   const PriceScreen({Key? key}) : super(key: key);
@@ -13,13 +13,13 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String? selectedCurrency = "USD";
-  DataModel? data;
+List <DataModel1?> data=[];
   bool flag = true;
-  DropdownButton<String> androidDropdown() {
+  DropdownButton<String> AndroidDropdown_Currency() {
     List<DropdownMenuItem<String>> dropdownItem = [];
     for (String currency in currenciesList) {
       DropdownMenuItem<String> newItem =
-          DropdownMenuItem<String>(child: Text(currency), value: currency);
+      DropdownMenuItem<String>(child: Text(currency), value: currency);
       dropdownItem.add(newItem);
     }
     return DropdownButton<String>(
@@ -35,7 +35,7 @@ class _PriceScreenState extends State<PriceScreen> {
     );
   }
 
-  CupertinoPicker iOSPicker() {
+  CupertinoPicker iOSPicker_currency() {
     List<Text> pickerItem = [];
     List <String> pickerItemString=[];
     for (String currency in currenciesList) {
@@ -46,8 +46,7 @@ class _PriceScreenState extends State<PriceScreen> {
     return CupertinoPicker(
       backgroundColor: Colors.lightBlue,
       itemExtent: 32.0,
-      onSelectedItemChanged: (selectedIndex) {
-        getData(pickerItemString[selectedIndex]);},
+      onSelectedItemChanged: (selectedIndex) {getData(pickerItemString[selectedIndex]);},
       children: pickerItem,
     );
   }
@@ -56,17 +55,20 @@ class _PriceScreenState extends State<PriceScreen> {
     try {
       data = await CoinData().getCoinData(value);
 
-      flag = false;
+      //print( "${data.length}");
+      setState(() {
+      });
     } catch (e) {
-      print(e);
+      //print(e);
     }
   }
 
   @override
   void initState() {
     // TODO: implement initState
+     getData('USD');
     super.initState();
-    getData('USD');
+
   }
 
   @override
@@ -88,21 +90,23 @@ class _PriceScreenState extends State<PriceScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10.0),
               ),
-              child: flag
-                  ? const Center(
-                      child: CircularProgressIndicator(
-                      color: Colors.red,
-                    ))
+              child: data.isEmpty
+                  ?  const Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.red,
+                  ))
                   : Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 15.0, horizontal: 30.0),
-                      child: Text(
-                        '1 BTC = ${data?.rate} $selectedCurrency',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            fontSize: 20.0, color: Colors.white),
-                      ),
-                    ),
+                padding: const EdgeInsets.symmetric(
+                    vertical: 15.0, horizontal: 30.0),
+                child: Column(
+                  children: List.generate(data.length, (index) =>   Text(
+                    '1 ${cryptoList[index]} = ${(data[index]?.rate)?.toStringAsFixed(2)} $selectedCurrency',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontSize: 20.0, color: Colors.white),
+                  ),)
+                ),
+              ),
             ),
           ),
           Container(
@@ -110,12 +114,48 @@ class _PriceScreenState extends State<PriceScreen> {
             height: 150.0,
             padding: const EdgeInsets.only(bottom: 30.0),
             color: Colors.lightBlueAccent,
-            child: Theme.of(context).platform == TargetPlatform.android
-                ?androidDropdown()
-                :  iOSPicker(),
+            child: Theme.of(context).platform == TargetPlatform.iOS
+                ? iOSPicker_currency()
+                : AndroidDropdown_Currency(),
           )
         ],
       ),
     );
   }
 }
+/*
+class CryptoCard extends StatelessWidget {
+  final double? value;
+  final String? selectedCurrency;
+  final String? cryptoCurrency;
+
+
+
+  CryptoCard({this.value, this.selectedCurrency, this.cryptoCurrency});
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
+      child: Card(
+        color: Colors.lightBlueAccent,
+        elevation: 5.0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
+          child: Text(
+            '1 $cryptoCurrency = $value $selectedCurrency',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 20.0,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}*/

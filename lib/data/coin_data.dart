@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import '../models/data_model.dart';
+import '../models/newDataModel.dart';
 const List<String> currenciesList =[
   'AUD',
   'BRL',
@@ -29,23 +29,57 @@ const List<String> currenciesList =[
 const List<String> cryptoList = [
   'BTC',
   'ETH',
-  'LTC',
+  'LTH',
 ];
+
 const coinAPIURL ='https://rest.coinapi.io/v1/exchangerate';
 const apiKey = '18EE2CDB-F9ED-443D-BDA3-859D20D5EA51';
+const apiKeyBkp='9BBFA483-1D9A-4250-B00A-DF8C7A7DB395';
 class CoinData{
-  Future<DataModel> getCoinData(String currency) async{
-    String requestURL = '$coinAPIURL/BTC/$currency?apikey=$apiKey';
-     http.Response response = await http.get(Uri.parse(requestURL));
-     if(response.statusCode==200){
+  List <DataModel1> list=[];
+  Future<List<DataModel1>> getCoinData(String currency) async{
+  for(String crypto in cryptoList){
+    String requestURL = '$coinAPIURL/$crypto/$currency?apikey=$apiKeyBkp';
+    //  String requestURL = '$bitcoinAverageURL/BTC$currency';
+    http.Response response = await http.get(Uri.parse(requestURL));
+    if(response.statusCode==200){
 
-       return DataModel.fromJson(jsonDecode(response.body));
-     }
-     else {
-       print(response.statusCode);
+      list.add(DataModel1.fromJson(jsonDecode(response.body)));
+    }
+    else {
+   //   print('error code ${response.statusCode}');
 
-       throw'Problem with get Request. Status ';
-     }
-
+      throw'Problem with get Request. ';
+    }
   }
+  return list;
+  }
+
+
 }
+/*
+class CoinData1 {
+  Future <Map<String,String>> getCoinData1(String selectedCurrency) async {
+    //4: Use a for loop here to loop through the cryptoList and request the data for each of them in turn.
+    //5: Return a Map of the results instead of a single value.
+    Map<String, String> cryptoPrices = {};
+    for (String crypto in cryptoList) {
+
+      //Update the URL to use the crypto symbol from the cryptoList
+      String requestURL =
+          '$coinAPIURL/$crypto/$selectedCurrency?apikey=$apiKey';
+      http.Response response = await http.get(Uri.parse(requestURL));
+      if (response.statusCode == 200) {
+        var decodedData = jsonDecode(response.body);
+        double lastPrice = decodedData['rate'];
+        //Create a new key value pair, with the key being the crypto symbol and the value being the lastPrice of that crypto currency.
+        cryptoPrices[crypto] = lastPrice.toStringAsFixed(0);
+      } else {
+        print(response.statusCode);
+        throw 'Problem with the get request';
+      }
+    }
+    print(cryptoPrices);
+    return cryptoPrices;
+  }
+}*/
